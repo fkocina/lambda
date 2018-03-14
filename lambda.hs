@@ -35,9 +35,9 @@ subst x l (App l1 l2) = (App ln1 ln2) -- substitute in both parts of the applic.
 subst x l1 l2@(Abs v e1) -- substitute in an abstraction until bound var. found
   | x == v    = l2 -- the variable is bound in subexpr.: nothing substituted
   | otherwise = (Abs v2 e2) -- the variable can be free
-    where v2 = findVar v (freeVars l1) -- find a non-colliding variable name
-          e2 = subst x l1 e3 -- substitute recursively
-          e3 = subst v (Var v2) e1 -- rename var. v to var. v2 in e1
+  where v2 = findVar v (freeVars l1) -- find a non-colliding variable name
+        e2 = subst x l1 e3 -- substitute recursively
+        e3 = subst v (Var v2) e1 -- rename var. v to var. v2 in e1
 
 findVar :: VarName -> [VarName] -> VarName -- find a non-colliding var. name
 findVar v [] = v
