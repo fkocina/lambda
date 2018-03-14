@@ -1,0 +1,10 @@
+_Lambda:_Lambda_calculus_
+Performs basic operations on lambda calculus.
+
+_How_to_run_
+$ ghci lambda.hs
+
+_License_
+GPLv3 (C) Filip Kocina
+You should have received a copy of the license; if not, see
+<http://www.gnu.org/licenses/>.
