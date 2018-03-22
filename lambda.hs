@@ -42,7 +42,7 @@ subst x l1 l2@(Abs v e1) -- substitute in an abstraction until bound var. found
 findVar :: VarName -> [VarName] -> VarName -- find a non-colliding var. name
 findVar v [] = v
 findVar v a
-  | elem v a = findVar ('_':v) a -- must be another
+  | elem v a  = findVar ('_':v) a -- must be another
   | otherwise = v -- not colliding
 
 freeVars :: LExpr -> [VarName] -- returns a list of free variables
@@ -60,7 +60,7 @@ rmDup (x:xs) = x:xs2 -- use the head and remove it from the rest
 rmVar :: VarName -> [VarName] -> [VarName] -- rmVar var from = result
 rmVar x [] = []
 rmVar x (a:as)
-  | x == a    = rmVar x as -- remove if the same
+  | x == a    = as2 -- remove if the same
   | otherwise = a:as2 -- keep if not
   where as2 = rmVar x as
 
@@ -71,7 +71,7 @@ beta l = l -- cannot be performed
 eta :: LExpr -> LExpr -- perform eta reduction
 eta l2@(Abs v1 (App l1 (Var v2)))
   | v1 /= v2              = l2
-  | elem v1 (freeVars l1) = l2 -- cannot be performed
+  | elem v1 $ freeVars l1 = l2 -- cannot be performed
   | otherwise             = l1 -- reduction OK
 eta l = l -- cannot be performed
 
