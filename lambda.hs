@@ -29,20 +29,20 @@ subst :: VarName -> LExpr -> LExpr -> LExpr -- subst what with where = result
 subst x l1 l2@(Var y) -- lambda expression is only a variable
   | x == y    = l1 -- substitute only if the same variable
   | otherwise = l2 -- leave intact otherwise
-subst x l (App l1 l2) = (App ln1 ln2) -- substitute in both parts of the applic.
+subst x l (App l1 l2) = App ln1 ln2 -- substitute in both parts of the applic.
   where ln1 = subst x l l1
         ln2 = subst x l l2
 subst x l1 l2@(Abs v e1) -- substitute in an abstraction until bound var. found
   | x == v    = l2 -- the variable is bound in subexpr.: nothing substituted
-  | otherwise = (Abs v2 e2) -- the variable can be free
-  where v2 = findVar v (freeVars l1) -- find a non-colliding variable name
+  | otherwise = Abs v2 e2 -- the variable can be free
+  where v2 = findVar v $ freeVars l1 -- find a non-colliding variable name
         e2 = subst x l1 e3 -- substitute recursively
         e3 = subst v (Var v2) e1 -- rename var. v to var. v2 in e1
 
 findVar :: VarName -> [VarName] -> VarName -- find a non-colliding var. name
 findVar v [] = v
 findVar v a
-  | elem v a = findVar ("_"++v) a -- must be another
+  | elem v a = findVar ('_':v) a -- must be another
   | otherwise = v -- not colliding
 
 freeVars :: LExpr -> [VarName] -- returns a list of free variables
@@ -50,18 +50,19 @@ freeVars (Var x) = [x] -- only one variable
 freeVars (App l1 l2) = rmDup (a1++a2) -- free vars in both l1 and l2 returned
   where a1 = freeVars l1
         a2 = freeVars l2
-freeVars (Abs x l) = rmVar x (freeVars l) -- free variables from l without x
+freeVars (Abs x l) = rmVar x $ freeVars l -- free variables from l without x
 
 rmDup :: [VarName] -> [VarName] -- remove duplicities from the list
 rmDup [] = []
-rmDup (x:xs) = [x]++(rmVar x xs2) -- use the head and remove it from the rest
-  where xs2 = rmDup xs
+rmDup (x:xs) = x:xs2 -- use the head and remove it from the rest
+  where xs2 = rmVar x $ rmDup xs
 
 rmVar :: VarName -> [VarName] -> [VarName] -- rmVar var from = result
 rmVar x [] = []
 rmVar x (a:as)
   | x == a    = rmVar x as -- remove if the same
-  | otherwise = [a]++(rmVar x as) -- keep if not
+  | otherwise = a:as2 -- keep if not
+  where as2 = rmVar x as
 
 beta :: LExpr -> LExpr -- perform beta reduction
 beta (App (Abs v l1) l2) = subst v l2 l1
